@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Techcom Shop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Khmer:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <style>
+      :root {
+        --ink: #12263a;
+        --ink-soft: #1d3852;
+        --amber: #f5a524;
+        --amber-deep: #b86e00;
+        --paper: #f2f5f8;
+        --line: #dde4ec;
+        --muted: #5d6c7b;
+        --bs-body-font-family: "Plus Jakarta Sans", "Noto Sans Khmer", system-ui, sans-serif;
+      }
+
+      body { background: var(--paper); color: var(--ink); }
+      a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+        outline: 3px solid var(--amber);
+        outline-offset: 2px;
+      }
+
+      /* Navbar */
+      .site-nav { background: var(--ink); }
+      .site-nav .navbar-brand { font-weight: 800; letter-spacing: -0.01em; }
+      .brand-mark {
+        display: inline-grid; place-items: center;
+        width: 34px; height: 34px; border-radius: 10px;
+        background: var(--amber); color: var(--ink); margin-right: .55rem;
+      }
+      .nav-search { flex: 1 1 220px; max-width: 360px; }
+      .nav-search .input-group-text,
+      .nav-search .form-control { background: var(--ink-soft); border-color: transparent; color: #fff; }
+      .nav-search .form-control::placeholder { color: #9fb2c4; }
+      .nav-search .form-control:focus { box-shadow: none; background: #24486a; }
+
+      /* Hero */
+      .hero { background: linear-gradient(120deg, var(--ink) 0%, var(--ink-soft) 100%); color: #fff; }
+      .hero h1 { font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; max-width: 18ch; }
+      .hero p { color: #c3d1de; max-width: 46ch; }
+      .hero-chip {
+        display: inline-flex; align-items: center; gap: .45rem;
+        padding: .4rem .8rem; border-radius: 999px;
+        background: rgba(255,255,255,.09); font-size: .85rem; color: #e5edf5;
+      }
+      .hero-chip i { color: var(--amber); }
+      .btn-hero { background: var(--amber); color: var(--ink); font-weight: 700; border: 0; }
+      .btn-hero:hover { background: #ffb940; color: var(--ink); }
+
+      /* Category pills (app.js keeps toggling btn-warning / btn-outline-warning) */
+      #categoryButtons .btn {
+        border-radius: 999px; font-weight: 600; padding: .4rem 1.1rem;
+        transition: background-color .15s, color .15s, border-color .15s;
+      }
+      #categoryButtons .btn-warning { background: var(--ink); border-color: var(--ink); color: #fff; }
+      #categoryButtons .btn-outline-warning { color: var(--ink); border-color: var(--line); background: #fff; }
+      #categoryButtons .btn-outline-warning:hover { background: var(--amber); border-color: var(--amber); color: var(--ink); }
+
+      /* Product cards */
+      .card { border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: transform .18s, box-shadow .18s; }
+      .card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(18,38,58,.12) !important; }
+      .card-img-top { aspect-ratio: 4 / 3; object-fit: contain; background: #fff; padding: 1rem; border-bottom: 1px solid var(--line); }
+      .card-title { font-weight: 700; margin-bottom: .25rem; }
+      .cat-tag { display: inline-block; font-size: .75rem; font-weight: 600; color: var(--muted); background: var(--paper); padding: .15rem .6rem; border-radius: 999px; margin-bottom: .6rem; }
+      .price { font-size: 1.3rem; font-weight: 800; color: var(--ink); }
+      .add-btn { background: var(--amber); border: 0; color: var(--ink); font-weight: 700; border-radius: 12px; padding: .6rem; }
+      .add-btn:hover, .add-btn:active { background: #ffb940; color: var(--ink); }
+
+      /* Cart panel */
+      #cartPanel { width: min(420px, 100vw); }
+      #cartPanel .offcanvas-header { background: var(--ink); color: #fff; }
+      #cartPanel .btn-close { filter: invert(1); }
+      #checkoutBtn { border-radius: 12px; padding: .75rem; font-weight: 700; }
+      .totals { border-radius: 14px; border: 1px solid var(--line) !important; background: var(--paper) !important; }
+
+      /* Footer */
+      footer { background: var(--ink) !important; }
+      footer a { text-decoration: none; }
+      footer a:hover { text-decoration: underline; color: var(--amber) !important; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .card, #categoryButtons .btn { transition: none; }
+        .card:hover { transform: none; }
+      }
+    </style>
+  </head>
+
+  <body class="d-flex flex-column min-vh-100">
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-dark site-nav sticky-top">
+      <div class="container flex-nowrap gap-2">
+        <a class="navbar-brand d-flex align-items-center me-2" href="#top">
+          <span class="brand-mark"><i class="bi bi-lightning-charge-fill"></i></span>
+          <span class="d-none d-sm-inline">Techcom Shop</span>
+        </a>
+        <div class="input-group input-group-sm nav-search ms-auto">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input id="searchInput" type="search" class="form-control" placeholder="Search products..." aria-label="Search products" />
+        </div>
+        <button class="btn btn-warning position-relative fw-semibold" type="button" data-bs-toggle="offcanvas" data-bs-target="#cartPanel">
+          <i class="bi bi-cart3"></i> <span class="d-none d-sm-inline">Cart</span>
+          <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <header class="hero">
+      <div class="container py-5">
+        <h1 class="display-5 mb-3">Laptops and accessories for school and work</h1>
+        <p class="fs-5 mb-4">Pick what you need, add it to your cart, and we deliver in Phnom Penh and to every province.</p>
+        <a href="#products" class="btn btn-hero btn-lg px-4 mb-4"><i class="bi bi-bag me-2"></i>Shop products</a>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="hero-chip"><i class="bi bi-truck"></i>Delivery from $1.50</span>
+          <span class="hero-chip"><i class="bi bi-qr-code"></i>Pay with ABA / KHQR</span>
+          <span class="hero-chip"><i class="bi bi-cash-coin"></i>Cash on delivery</span>
+          <span class="hero-chip"><i class="bi bi-tag"></i>Coupons SAVE10 and SAVE20</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CATEGORY BUTTONS -->
+    <div class="container mt-4">
+      <div id="categoryButtons" class="d-flex flex-wrap gap-2">
+        <button class="btn btn-warning" data-category="all">All</button>
+        <button class="btn btn-outline-warning" data-category="laptop">Laptop</button>
+        <button class="btn btn-outline-warning" data-category="keyboard">Keyboard</button>
+        <button class="btn btn-outline-warning" data-category="mouse">Mouse</button>
+        <button class="btn btn-outline-warning" data-category="headphone">Headphone</button>
+        <button class="btn btn-outline-warning" data-category="PC set">PC set</button>
+        <button class="btn btn-outline-warning" data-category="drone">Drone</button>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <main class="container py-4 flex-grow-1" id="top">
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4" id="products">
+
+        <!-- Product 1 -->
+        <div class="col product-col" data-category="laptop">
+          <div class="card h-100 shadow-sm">
+            <img src="image/laptop.jpg" class="card-img-top" alt="Laptop" />
+            <div class="card-body">
+              <span class="cat-tag">Laptop</span>
+              <h5 class="card-title">Laptop</h5>
+              <p class="card-text text-secondary">Fast laptop for study and work.</p>
+              <p class="price mb-0">$550.00</p>
+            </div>
+            <div class="card-footer bg-white border-0 pb-3">
+              <button class="btn btn-warning w-100 add-btn" data-id="1" data-name="Laptop" data-price="550">
+                <i class="bi bi-cart-plus"></i> Add to cart
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product 2 -->
+        <div class="col product-col" data-category="keyboard">
+          <div class="card h-100 shadow-sm">
+            <img src="image/keyboard.jpg" class="card-img-top" alt="Keyboard" />
+            <div class="card-body">
+              <span class="cat-tag">Keyboard</span>
+              <h5 class="card-title">Keyboard</h5>
+              <p class="card-text text-secondary">Comfortable keyboard for typing.</p>
+              <p class="price mb-0">$25.00</p>
+            </div>
+            <div class="card-footer bg-white border-0 pb-3">
+              <button class="btn btn-warning w-100 add-btn" data-id="2" data-name="Keyboard" data-price="25">
+                <i class="bi bi-cart-plus"></i> Add to cart
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product 3 -->
+        <div class="col product-col" data-category="mouse">
+          <div class="card h-100 shadow-sm">
+            <img src="image/mouse.jpg" class="card-img-top" alt="RGB Mouse" />
+            <div class="card-body">
+              <span class="cat-tag">Mouse</span>
+              <h5 class="card-title">RGB Mouse</h5>
+              <p class="card-text text-secondary">Rechargeable mouse with RGB light.</p>
+              <p class="price mb-0">$12.00</p>
+            </div>
+            <div class="card-footer bg-white border-0 pb-3">
+              <button class="btn btn-warning w-100 add-btn" data-id="3" data-name="RGB Mouse" data-price="12">
+                <i class="bi bi-cart-plus"></i> Add to cart
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product 4 -->
+        <div class="col product-col" data-category="headphone">
+          <div class="card h-100 shadow-sm">
+            <img src="image/headphone.jpg" class="card-img-top" alt="Headphone" />
+            <div class="card-body">
+              <span class="cat-tag">Headphone</span>
+              <h5 class="card-title">Headphone</h5>
+              <p class="card-text text-secondary">Clear sound for music and calls.</p>
+              <p class="price mb-0">$30.00</p>
+            </div>
+            <div class="card-footer bg-white border-0 pb-3">
+              <button class="btn btn-warning w-100 add-btn" data-id="4" data-name="Headphone" data-price="30">
+                <i class="bi bi-cart-plus"></i> Add to cart
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product 5 -->
+        <div class="col product-col" data-category="PC set">
+          <div class="card h-100 shadow-sm">
+            <img src="image/set.jpg" class="card-img-top" alt="Gadget Set" />
+            <div class="card-body">
+              <span class="cat-tag">PC set</span>
+              <h5 class="card-title">Gadget Set</h5>
+              <p class="card-text text-secondary">Useful accessories bundle.</p>
+              <p class="price mb-0">$950.00</p>
+            </div>
+            <div class="card-footer bg-white border-0 pb-3">
+              <button class="btn btn-warning w-100 add-btn" data-id="5" data-name="Gadget Set" data-price="950">
+                <i class="bi bi-cart-plus"></i> Add to cart
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product 6 -->
+        <div class="col product-col" data-category="PC set">
+          <div class="card h-100 shadow-sm">
+            <img src="image/web cam.jpg" class="card-img-top" alt="Gadget Set" />
+            <div class="card-body">
+              <span class="cat-tag">Web cam</span>
+              <h5 class="card-title">Web camera</h5>
+              <p class="card-text text-secondary">Useful accessories for desktop.</p>
+              <p class="price mb-0">$45.00</p>
+            </div>
+            <div class="card-footer bg-white border-0 pb-3">
+              <button class="btn btn-warning w-100 add-btn" data-id="5" data-name="Gadget Set" data-price="45">
+                <i class="bi bi-cart-plus"></i> Add to cart
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product 7 -->
+        <div class="col product-col" data-category="PC set">
+          <div class="card h-100 shadow-sm">
+            <img src="image/cctv.jpg" class="card-img-top" alt="Gadget Set" />
+            <div class="card-body">
+              <span class="cat-tag">CCTV</span>
+              <h5 class="card-title">Cctv 360</h5>
+              <p class="card-text text-secondary">Useful accessories for house.</p>
+              <p class="price mb-0">$35.00</p>
+            </div>
+            <div class="card-footer bg-white border-0 pb-3">
+              <button class="btn btn-warning w-100 add-btn" data-id="5" data-name="Gadget Set" data-price="35">
+                <i class="bi bi-cart-plus"></i> Add to cart
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product8  -->
+        <div class="col product-col" data-category="drone">
+          <div class="card h-100 shadow-sm">
+            <img src="image/Drone.jpg" class="card-img-top" alt="Drone" />
+            <div class="card-body">
+              <span class="cat-tag">Drone</span>
+              <h5 class="card-title">Drone</h5>
+              <p class="card-text text-secondary">Camera drone for photos and video.</p>
+              <p class="price mb-0">$120.00</p>
+            </div>
+            <div class="card-footer bg-white border-0 pb-3">
+              <button class="btn btn-warning w-100 add-btn" data-id="6" data-name="Drone" data-price="120">
+                <i class="bi bi-cart-plus"></i> Add to cart
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <p id="noResult" class="text-center text-secondary d-none py-5 fs-5">
+        <i class="bi bi-search d-block fs-1 mb-2"></i>No products found. Try another word or pick All.
+      </p>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="text-light mt-4">
+      <div class="container py-5">
+        <div class="row g-4">
+          <div class="col-md-4">
+            <h5 class="fw-bold"><i class="bi bi-lightning-charge-fill me-2" style="color:var(--amber)"></i>Techcom Shop</h5>
+            <p class="text-secondary small mb-3">Laptops, keyboards, mice, headphones and gadgets for students and workers. Delivery in Phnom Penh and to the provinces.</p>
+            <div class="fs-4 d-flex gap-3">
+              <a href="#" class="text-light" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+              <a href="#" class="text-light" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
+              <a href="#" class="text-light" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-2">
+            <h6 class="fw-semibold">Shop</h6>
+            <ul class="list-unstyled small">
+              <li class="mb-1"><a href="#top" class="text-secondary">All products</a></li>
+              <li class="mb-1"><a href="#cartPanel" class="text-secondary" data-bs-toggle="offcanvas" role="button">Your cart</a></li>
+              <li><a href="#top" class="text-secondary">Back to top</a></li>
+            </ul>
+          </div>
+
+          <div class="col-6 col-md-2">
+            <h6 class="fw-semibold">Help</h6>
+            <ul class="list-unstyled small">
+              <li class="mb-1"><span class="text-secondary">Coupons: SAVE10, SAVE20</span></li>
+              <li class="mb-1"><span class="text-secondary">Delivery: $1.50 / $2.50</span></li>
+              <li><span class="text-secondary">VAT: 10%</span></li>
+            </ul>
+          </div>
+
+          <div class="col-md-4">
+            <h6 class="fw-semibold">Contact</h6>
+            <ul class="list-unstyled small text-secondary">
+              <li class="mb-1"><i class="bi bi-geo-alt me-2"></i>Phnom Penh, Cambodia</li>
+              <li class="mb-1"><i class="bi bi-telephone me-2"></i>+855 12 345 678</li>
+              <li class="mb-1"><i class="bi bi-envelope me-2"></i>info@techcomshop.com</li>
+              <li><i class="bi bi-clock me-2"></i>Open every day, 8:00 AM – 8:00 PM</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-top border-secondary">
+        <div class="container py-3 d-flex flex-column flex-sm-row justify-content-between small text-secondary">
+          <span>© <span id="year">2026</span> Techcom Shop. All rights reserved.</span>
+          <span>Pay with cash on delivery or ABA / KHQR</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- CART PANEL -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="cartPanel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title"><i class="bi bi-cart3 me-1"></i> Your Cart</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+
+      <div class="offcanvas-body d-flex flex-column">
+        <div id="cartItems" class="mb-3"></div>
+
+        <label class="form-label fw-semibold small"><i class="bi bi-tag"></i> Coupon code</label>
+        <div class="input-group mb-1">
+          <input id="couponInput" class="form-control" placeholder="E.G. SAVE10" />
+          <button class="btn btn-dark" onclick="applyCoupon()">Apply</button>
+        </div>
+        <div id="couponMsg" class="small mb-3"></div>
+
+        <label class="form-label fw-semibold small"><i class="bi bi-truck"></i> Delivery</label>
+        <select id="delivery" class="form-select mb-3" onchange="render()">
+          <option value="1.5">Phnom Penh – $1.50</option>
+          <option value="2.5">Provinces – $2.50</option>
+        </select>
+
+        <div class="totals p-3">
+          <div class="d-flex justify-content-between mb-1"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+          <div class="d-flex justify-content-between text-success mb-1"><span>Discount</span><span id="discount">-$0.00</span></div>
+          <div class="d-flex justify-content-between mb-1"><span>VAT 10%</span><span id="vat">$0.00</span></div>
+          <div class="d-flex justify-content-between mb-2"><span>Delivery</span><span id="deliveryFee">$0.00</span></div>
+          <div class="d-flex justify-content-between fs-5 fw-bold border-top pt-2"><span>Total</span><span id="total">$0.00</span></div>
+          <div class="d-flex justify-content-between text-secondary small"><span>Total in riel</span><span id="riel">0 ៛</span></div>
+        </div>
+
+        <button id="checkoutBtn" class="btn btn-success mt-3" disabled>
+          <i class="bi bi-bag-check"></i> Checkout
+        </button>
+      </div>
+    </div>
+
+    <!-- SCRIPTS: Bootstrap first, then your own file -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
